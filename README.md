@@ -10,8 +10,7 @@
 ---
 
 ## Live Demo
-**[vibrant-victory-production-35d5.up.railway.app](https://vibrant-victory-production-35d5.up.railway.app)**
-
+# https://trendscope.up.railway.app
 ---
 
 ## Features
