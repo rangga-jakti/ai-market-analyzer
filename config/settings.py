@@ -16,6 +16,10 @@ ALLOWED_HOSTS = [
     os.getenv('RAILWAY_PUBLIC_DOMAIN', ''),
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://trendscope.up.railway.app',
+    'https://*.railway.app',
+]
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
