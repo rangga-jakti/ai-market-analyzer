@@ -10,8 +10,7 @@
 ---
 
 ## Live Demo
-
-🔗 **[markettrend.up.railway.app](https://markettrend.up.railway.app)** *(coming soon)*
+**[vibrant-victory-production-35d5.up.railway.app](https://vibrant-victory-production-35d5.up.railway.app)**
 
 ---
 
