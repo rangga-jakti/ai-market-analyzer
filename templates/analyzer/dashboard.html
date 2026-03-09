@@ -18,19 +18,16 @@
       <div class="stat-label">Total Analisis</div>
       <div class="stat-value">{{ analyses|length }}<span>keyword</span></div>
     </div>
-    <div class="stat-card">
-      <div class="stat-label">Rata-rata Score</div>
-      <div class="stat-value">
-        {% if analyses %}
-          {% with total=0 %}
-            {{ analyses|length }}
-          {% endwith %}
-          <span>/ 100</span>
-        {% else %}
-          —
-        {% endif %}
-      </div>
+  <div class="stat-card">
+    <div class="stat-label">Rata-rata Score</div>
+    <div class="stat-value">
+      {% if avg_score %}
+        {{ avg_score }}<span>/ 100</span>
+      {% else %}
+        —
+      {% endif %}
     </div>
+  </div>
     <div class="stat-card">
       <div class="stat-label">Status</div>
       <div class="stat-value">Live<span>✓</span></div>

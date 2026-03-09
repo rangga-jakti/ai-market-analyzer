@@ -104,7 +104,13 @@ def dashboard(request):
         status='completed'
     ).order_by('-created_at')[:20]
 
-    return render(request, 'analyzer/dashboard.html', {'analyses': analyses})
+    scores = [a.trend_score for a in analyses if a.trend_score]
+    avg_score = round(sum(scores) / len(scores), 1) if scores else 0
+
+    return render(request, 'analyzer/dashboard.html', {
+        'analyses': analyses,
+        'avg_score': avg_score,
+    })
 
 
 @login_required
