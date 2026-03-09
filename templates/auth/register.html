@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block title %}Register — Market Trend{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-logo">🚀</div>
+      <h1 class="auth-title">Buat Akun Baru</h1>
+      <p class="auth-subtitle">Mulai analisis tren pasar secara gratis</p>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-error">⚠️ {{ error }}</div>
+    {% endif %}
+
+    <form method="POST" class="auth-form">
+      {% csrf_token %}
+
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input
+          type="text"
+          name="username"
+          class="form-input"
+          value="{{ username|default:'' }}"
+          placeholder="Pilih username unik"
+          required
+          autocomplete="username"
+        >
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email <span class="optional">(opsional)</span></label>
+        <input
+          type="email"
+          name="email"
+          class="form-input"
+          value="{{ email|default:'' }}"
+          placeholder="email@kamu.com"
+          autocomplete="email"
+        >
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input
+          type="password"
+          name="password1"
+          class="form-input"
+          placeholder="Minimal 8 karakter"
+          required
+          autocomplete="new-password"
+        >
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Konfirmasi Password</label>
+        <input
+          type="password"
+          name="password2"
+          class="form-input"
+          placeholder="Ulangi password"
+          required
+          autocomplete="new-password"
+        >
+      </div>
+
+      <button type="submit" class="auth-button">
+        Buat Akun →
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      Sudah punya akun?
+      <a href="{% url 'analyzer:login' %}">Masuk di sini</a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

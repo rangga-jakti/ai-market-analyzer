@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}Analisis Tren Pasar — AI Market Analyzer{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<div class="hero-section">
+
+  <div class="hero-badge">
+    Live Google Trends Data
+  </div>
+
+  <h1 class="hero-title">
+    Temukan Peluang Bisnis<br>
+    <span class="line-accent">Berbasis Data Nyata</span>
+  </h1>
+
+  <p class="hero-subtitle">
+    Masukkan keyword produk atau pasar. Sistem akan menganalisis tren Google,
+    menghitung skor, dan menghasilkan insight bisnis untukmu.
+  </p>
+
+  {% if error %}
+  <div class="alert alert-error">⚠️ {{ error }}</div>
+  {% endif %}
+
+  <form class="search-form" method="POST" action="{% url 'analyzer:analyze' %}" id="analyzeForm">
+    {% csrf_token %}
+    <div class="search-wrapper">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        name="keyword"
+        id="keywordInput"
+        placeholder="Contoh: electric vehicle, coffee shop, AI tools..."
+        class="search-input"
+        required
+        minlength="2"
+        maxlength="255"
+        autocomplete="off"
+      >
+      <button type="submit" class="search-button" id="submitBtn">
+        Analisis Sekarang
+      </button>
+    </div>
+  </form>
+
+  <!-- Trending suggestions -->
+  <div class="trending-wrap">
+    <span class="trending-label">🔥 Trending:</span>
+    <div class="trending-chips">
+    {% for item in trending %}
+        <button class="trend-chip" onclick="setKeyword('{{ item }}')">{{ item }}</button>
+    {% endfor %}
+    </div>
+  </div>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <span class="feature-icon">📈</span>
+      <h3>Data Real-time</h3>
+      <p>Langsung dari Google Trends — data 3 bulan terakhir</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🎯</span>
+      <h3>Trend Score</h3>
+      <p>Skor 0–100 dari algoritma multi-faktor kami</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🤖</span>
+      <h3>AI Insight</h3>
+      <p>Rekomendasi bisnis cerdas berbasis analisis data</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(8,11,20,0.92); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); justify-content:center; align-items:center;">
+  <div class="loading-box">
+    <div class="loading-spinner"></div>
+    <div class="loading-title">Menganalisis Pasar...</div>
+    <div class="loading-steps">
+      <div class="loading-step" id="step1">⏳ Mengambil data Google Trends</div>
+      <div class="loading-step" id="step2">⏳ Menghitung trend score</div>
+      <div class="loading-step" id="step3">⏳ Generating AI insight</div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function setKeyword(kw) {
+    document.getElementById('keywordInput').value = kw;
+    document.getElementById('keywordInput').focus();
+  }
+
+  const form    = document.getElementById('analyzeForm');
+  const btn     = document.getElementById('submitBtn');
+  const overlay = document.getElementById('loadingOverlay');
+
+  form.addEventListener('submit', () => {
+    overlay.style.display = 'flex';
+    btn.disabled = true;
+
+    setTimeout(() => {
+      document.getElementById('step1').classList.add('active');
+    }, 300);
+    setTimeout(() => {
+      document.getElementById('step1').classList.remove('active');
+      document.getElementById('step1').classList.add('done');
+      document.getElementById('step1').textContent = '✅ Data Google Trends berhasil diambil';
+      document.getElementById('step2').classList.add('active');
+    }, 3000);
+    setTimeout(() => {
+      document.getElementById('step2').classList.remove('active');
+      document.getElementById('step2').classList.add('done');
+      document.getElementById('step2').textContent = '✅ Trend score dihitung';
+      document.getElementById('step3').classList.add('active');
+    }, 5000);
+  });
+</script>
+{% endblock %}

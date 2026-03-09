@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+
+{% block title %}Detail — {{ analysis.keyword }}{% endblock %}
+
+{% block content %}
+<div class="result-container">
+
+  <div class="result-header">
+    <h1>Detail: <span class="keyword-highlight">{{ analysis.keyword }}</span></h1>
+    <p class="date-info">📅 Dianalisis pada {{ analysis.created_at|date:"d M Y, H:i" }}</p>
+  </div>
+
+  <div class="score-section">
+
+    <!-- Score Card -->
+    <div class="score-card">
+      <div class="score-number" id="scoreDisplay">0</div>
+      <div class="score-label">
+        {% if analysis.trend_score >= 75 %}Sangat Tinggi 🔥
+        {% elif analysis.trend_score >= 50 %}Tinggi 📈
+        {% elif analysis.trend_score >= 25 %}Sedang 📊
+        {% else %}Rendah 📉
+        {% endif %}
+      </div>
+      <div class="score-subtitle">Trend Score / 100</div>
+
+      <div class="score-divider"></div>
+
+      <div class="score-meta">
+        <div class="score-meta-item">
+          <span class="score-meta-label">Status</span>
+          <span class="status-badge status-{{ analysis.status }}">{{ analysis.status }}</span>
+        </div>
+        <div class="score-meta-item">
+          <span class="score-meta-label">Data Points</span>
+          <span class="score-meta-value">{{ data_points|length }} titik</span>
+        </div>
+        <div class="score-meta-item">
+          <span class="score-meta-label">Tanggal</span>
+          <span class="score-meta-value">{{ analysis.created_at|date:"d M Y" }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Breakdown -->
+    <div class="breakdown-card">
+      <h3>Detail Skor</h3>
+
+      <div class="breakdown-item">
+        <span class="breakdown-label">Rata-rata Interest</span>
+        <div class="breakdown-bar-wrap">
+          <div class="breakdown-bar">
+            <div class="breakdown-bar-fill" data-width="{{ avg_interest }}"></div>
+          </div>
+          <span class="breakdown-value">{{ avg_interest }}</span>
+        </div>
+      </div>
+
+      <div class="breakdown-item">
+        <span class="breakdown-label">Momentum Pasar</span>
+        <div class="breakdown-bar-wrap">
+          <div class="breakdown-bar">
+            <div class="breakdown-bar-fill" data-width="{{ momentum_score }}"></div>
+          </div>
+          <span class="breakdown-value">{{ momentum_score }}</span>
+        </div>
+      </div>
+
+      <div class="breakdown-item">
+        <span class="breakdown-label">Konsistensi</span>
+        <div class="breakdown-bar-wrap">
+          <div class="breakdown-bar">
+            <div class="breakdown-bar-fill" data-width="{{ consistency_score }}"></div>
+          </div>
+          <span class="breakdown-value">{{ consistency_score }}</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  {% if data_points %}
+  <div class="chart-section">
+    <div class="chart-header">
+      <h2>📉 Grafik Tren Historis</h2>
+      <div class="timeframe-selector">
+        <button class="tf-btn" data-days="7">7H</button>
+        <button class="tf-btn" data-days="30">1B</button>
+        <button class="tf-btn active" data-days="90">3B</button>
+        <button class="tf-btn" data-days="0">Semua</button>
+      </div>
+    </div>
+    <div class="chart-container">
+      <canvas id="trendChart"></canvas>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="insight-section">
+    <h2>💡 AI Business Insight</h2>
+    <div class="insight-box">{{ analysis.ai_insight }}</div>
+  </div>
+
+  <div class="action-buttons">
+    <a href="{% url 'analyzer:dashboard' %}" class="btn btn-secondary">← Dashboard</a>
+    <a href="{% url 'analyzer:homepage' %}" class="btn btn-primary">🔍 Analisis Baru</a>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.addEventListener('load', () => {
+
+    // Score counter
+    const target = parseFloat("{{ analysis.trend_score|floatformat:1 }}");
+    const el = document.getElementById('scoreDisplay');
+    if (el) {
+      let current = 0;
+      const step = target / 60;
+      const counter = setInterval(() => {
+        current += step;
+        if (current >= target) { current = target; clearInterval(counter); }
+        el.textContent = current.toFixed(1);
+      }, 16);
+    }
+
+    // Animate progress bars
+    document.querySelectorAll('.breakdown-bar-fill').forEach(bar => {
+      const w = parseFloat(bar.getAttribute('data-width').replace(',', '.'));
+      bar.style.width = '0%';
+      setTimeout(() => { bar.style.width = w + '%'; }, 100);
+    });
+
+    {% if data_points %}
+    // All data from Django
+    const allLabels = [{% for p in data_points %}"{{ p.date }}"{% if not forloop.last %},{% endif %}{% endfor %}];
+    const allValues = [{% for p in data_points %}{{ p.interest_value }}{% if not forloop.last %},{% endif %}{% endfor %}];
+
+    const ctx = document.getElementById('trendChart').getContext('2d');
+
+    function makeGradient() {
+      const g = ctx.createLinearGradient(0, 0, 0, 220);
+      g.addColorStop(0, 'rgba(255,107,53,0.35)');
+      g.addColorStop(1, 'rgba(255,107,53,0.0)');
+      return g;
+    }
+
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: allLabels,
+        datasets: [{
+          label: '{{ analysis.keyword }}',
+          data: allValues,
+          borderColor: '#ff6b35',
+          borderWidth: 2.5,
+          backgroundColor: makeGradient(),
+          fill: true,
+          tension: 0.4,
+          pointRadius: 3,
+          pointBackgroundColor: '#ff6b35',
+          pointBorderColor: '#080b14',
+          pointBorderWidth: 2,
+          pointHoverRadius: 6,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 800, easing: 'easeInOutQuart' },
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(13,17,23,0.95)',
+            borderColor: 'rgba(255,107,53,0.3)',
+            borderWidth: 1,
+            titleColor: '#f0f0f0',
+            bodyColor: '#ff6b35',
+            padding: 12,
+            cornerRadius: 10,
+            callbacks: { label: ctx => ` Interest: ${ctx.parsed.y}` }
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(255,255,255,0.04)' },
+            ticks: { color: '#4a5568', font: { size: 10 }, maxTicksLimit: 8 }
+          },
+          y: {
+            min: 0, max: 100,
+            grid: { color: 'rgba(255,255,255,0.04)' },
+            ticks: { color: '#4a5568', font: { size: 10 } }
+          }
+        }
+      }
+    });
+
+    // Timeframe selector
+    function updateChart(days) {
+      let labels, values;
+      if (days === 0 || allLabels.length <= days) {
+        labels = allLabels;
+        values = allValues;
+      } else {
+        labels = allLabels.slice(-days);
+        values = allValues.slice(-days);
+      }
+      chart.data.labels = labels;
+      chart.data.datasets[0].data = values;
+      chart.data.datasets[0].backgroundColor = makeGradient();
+      chart.update();
+    }
+
+    document.querySelectorAll('.tf-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        updateChart(parseInt(btn.dataset.days));
+      });
+    });
+
+    {% endif %}
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block title %}Login — Market Trend{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+
+  <div class="auth-split">
+
+    <!-- Left: Branding Panel -->
+    <div class="auth-panel">
+      <div class="auth-panel-content">
+        <div class="auth-panel-badge">AI-Powered Analytics</div>
+        <h2 class="auth-panel-title">Baca Pasar.<br>Ambil Keputusan.</h2>
+        <p class="auth-panel-sub">Platform analisis tren berbasis data Google Trends + AI insight — untuk pebisnis yang ingin selangkah lebih maju.</p>
+
+        <div class="auth-stats">
+          <div class="auth-stat">
+            <span class="auth-stat-num">91</span>
+            <span class="auth-stat-label">Data Points</span>
+          </div>
+          <div class="auth-stat-divider"></div>
+          <div class="auth-stat">
+            <span class="auth-stat-num">3x</span>
+            <span class="auth-stat-label">Lebih Cepat</span>
+          </div>
+          <div class="auth-stat-divider"></div>
+          <div class="auth-stat">
+            <span class="auth-stat-num">AI</span>
+            <span class="auth-stat-label">Insight</span>
+          </div>
+        </div>
+
+        <div class="auth-panel-tags">
+          <span class="auth-tag">Google Trends</span>
+          <span class="auth-tag">Groq LLM</span>
+          <span class="auth-tag">Real-time Data</span>
+          <span class="auth-tag">Trend Score</span>
+        </div>
+      </div>
+
+      <!-- Decorative chart lines -->
+      <div class="auth-panel-deco">
+        <svg viewBox="0 0 300 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polyline points="0,90 30,70 60,80 90,40 120,55 150,20 180,35 210,15 240,30 270,10 300,25"
+            stroke="rgba(255,107,53,0.5)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <polyline points="0,100 30,95 60,105 90,80 120,90 150,60 180,75 210,55 240,70 270,45 300,60"
+            stroke="rgba(167,139,250,0.35)" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <polyline points="0,90 30,70 60,80 90,40 120,55 150,20 180,35 210,15 240,30 270,10 300,25"
+            stroke="rgba(255,107,53,0.08)" stroke-width="20" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Right: Login Form -->
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="auth-logo-wrap">
+          <span class="auth-logo-dot"></span>
+          <span class="auth-logo-text">MarketTrend</span>
+        </div>
+        <h1 class="auth-title">Masuk ke Akun</h1>
+        <p class="auth-subtitle">Lanjutkan analisis pasar kamu</p>
+      </div>
+
+      {% if error %}
+      <div class="alert alert-error">⚠️ {{ error }}</div>
+      {% endif %}
+
+      <form method="POST" class="auth-form">
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input
+            type="text"
+            name="username"
+            class="form-input"
+            value="{{ username|default:'' }}"
+            placeholder="Masukkan username"
+            required
+            autocomplete="username"
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input
+            type="password"
+            name="password"
+            class="form-input"
+            placeholder="Masukkan password"
+            required
+            autocomplete="current-password"
+          >
+        </div>
+
+        <button type="submit" class="auth-button">
+          Masuk →
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        Belum punya akun?
+        <a href="{% url 'analyzer:register' %}">Daftar sekarang</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

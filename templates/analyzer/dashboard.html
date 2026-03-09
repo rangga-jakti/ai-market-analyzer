@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard — AI Market Analyzer{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+
+  <div class="dashboard-header">
+    <h1>📊 Dashboard Analisis</h1>
+    <a href="{% url 'analyzer:homepage' %}" class="btn btn-primary">
+      + Analisis Baru
+    </a>
+  </div>
+
+  <!-- Stats -->
+  <div class="dashboard-stats">
+    <div class="stat-card">
+      <div class="stat-label">Total Analisis</div>
+      <div class="stat-value">{{ analyses|length }}<span>keyword</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Rata-rata Score</div>
+      <div class="stat-value">
+        {% if analyses %}
+          {% with total=0 %}
+            {{ analyses|length }}
+          {% endwith %}
+          <span>/ 100</span>
+        {% else %}
+          —
+        {% endif %}
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Status</div>
+      <div class="stat-value">Live<span>✓</span></div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  {% if analyses %}
+  <div class="table-container">
+    <table class="analysis-table">
+      <thead>
+        <tr>
+          <th>Keyword</th>
+          <th>Trend Score</th>
+          <th>Status</th>
+          <th>Tanggal</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for analysis in analyses %}
+        <tr>
+          <td class="keyword-cell">{{ analysis.keyword }}</td>
+          <td>
+            {% if analysis.trend_score >= 75 %}
+              <span class="score-pill score-high">▲ {{ analysis.trend_score|floatformat:1 }}</span>
+            {% elif analysis.trend_score >= 40 %}
+              <span class="score-pill score-medium">● {{ analysis.trend_score|floatformat:1 }}</span>
+            {% else %}
+              <span class="score-pill score-low">▼ {{ analysis.trend_score|floatformat:1 }}</span>
+            {% endif %}
+          </td>
+          <td>
+            <span class="status-badge status-{{ analysis.status }}">
+              {{ analysis.status }}
+            </span>
+          </td>
+          <td style="color: var(--text-secondary); font-size: 0.85rem;">
+            {{ analysis.created_at|date:"d M Y, H:i" }}
+          </td>
+          <td>
+            <a href="{% url 'analyzer:detail' analysis.pk %}" class="btn-small">
+              Detail →
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% else %}
+  <div class="empty-state">
+    <span class="empty-icon">📭</span>
+    <p>Belum ada analisis yang tersimpan.</p>
+    <a href="{% url 'analyzer:homepage' %}" class="btn btn-primary">
+      Mulai Analisis Pertama
+    </a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}AI Market Trend Analyzer{% endblock %}</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="{% url 'analyzer:homepage' %}" class="nav-brand">
+      <span class="brand-dot"></span>
+      Market<span class="brand-accent">Trend</span>
+    </a>
+    <div class="nav-links">
+      {% if user.is_authenticated %}
+        <a href="{% url 'analyzer:homepage' %}">⚡ Analisis</a>
+        <a href="{% url 'analyzer:compare' %}">⚔️ Compare</a>
+        <a href="{% url 'analyzer:dashboard' %}">📊 Dashboard</a>
+        <span class="nav-username">👤 {{ user.username }}</span>
+        <a href="#" class="nav-logout" id="logoutBtn">Keluar</a>
+      {% else %}
+        <a href="{% url 'analyzer:login' %}">Masuk</a>
+        <a href="{% url 'analyzer:register' %}" class="nav-register">Daftar</a>
+      {% endif %}
+    </div>
+  </div>
+</nav>
+
+{% if user.is_authenticated %}
+<div id="logoutModal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-icon">👋</div>
+    <h3 class="modal-title">Yakin mau keluar?</h3>
+    <p class="modal-subtitle">Sesi kamu akan diakhiri.</p>
+    <div class="modal-actions">
+      <button class="modal-cancel" id="cancelLogout">Batal</button>
+      <a href="{% url 'analyzer:logout' %}" class="modal-confirm">Ya, Keluar</a>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<main class="main-content">
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">
+  © 2026 AI Market Trend Analyzer. All rights reserved.
+</footer>
+
+{% block scripts %}{% endblock %}
+
+<script>
+  const logoutBtn    = document.getElementById('logoutBtn');
+  const logoutModal  = document.getElementById('logoutModal');
+  const cancelLogout = document.getElementById('cancelLogout');
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      logoutModal.classList.add('active');
+    });
+  }
+
+  if (cancelLogout) {
+    cancelLogout.addEventListener('click', () => {
+      logoutModal.classList.remove('active');
+    });
+  }
+
+  if (logoutModal) {
+    logoutModal.addEventListener('click', (e) => {
+      if (e.target === logoutModal) {
+        logoutModal.classList.remove('active');
+      }
+    });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && logoutModal) {
+      logoutModal.classList.remove('active');
+    }
+  });
+</script>
+
+</body>
+</html>

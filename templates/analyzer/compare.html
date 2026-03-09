@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block title %}Compare Keywords — Market Trend{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+
+  <div class="hero-badge">Keyword Comparison Tool</div>
+
+  <h1 class="hero-title">
+    Bandingkan Dua<br>
+    <span class="line-accent">Tren Pasar</span>
+  </h1>
+
+  <p class="hero-subtitle">
+    Masukkan dua keyword dengan format <strong style="color:var(--accent)">A vs B</strong>
+    untuk melihat perbandingan tren secara head-to-head.
+  </p>
+
+  {% if error %}
+  <div class="alert alert-error">⚠️ {{ error }}</div>
+  {% endif %}
+
+  <form class="search-form" method="POST"
+        action="{% url 'analyzer:compare_analyze' %}"
+        id="compareForm">
+    {% csrf_token %}
+    <div class="search-wrapper">
+      <span class="search-icon">⚔️</span>
+      <input
+        type="text"
+        name="query"
+        placeholder="Contoh: coffee shop vs bubble tea"
+        class="search-input"
+        value="{{ query|default:'' }}"
+        required
+        autocomplete="off"
+      >
+      <button type="submit" class="search-button" id="submitBtn">
+        Bandingkan
+      </button>
+    </div>
+  </form>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <span class="feature-icon">📊</span>
+      <h3>Head-to-Head Chart</h3>
+      <p>Grafik dua keyword dalam satu tampilan</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🏆</span>
+      <h3>Pemenang Otomatis</h3>
+      <p>Sistem menentukan keyword mana yang lebih kuat</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">📈</span>
+      <h3>Analisis Momentum</h3>
+      <p>Lihat keyword mana yang sedang naik daun</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(8,11,20,0.92); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); justify-content:center; align-items:center;">
+  <div class="loading-box">
+    <div class="loading-spinner"></div>
+    <div class="loading-title">Membandingkan Tren...</div>
+    <div class="loading-steps">
+      <div class="loading-step" id="step1">🔍 Mengambil data keyword pertama</div>
+      <div class="loading-step" id="step2">🔍 Mengambil data keyword kedua</div>
+      <div class="loading-step" id="step3">⚔️ Membandingkan head-to-head</div>
+      <div class="loading-step" id="step4">🏆 Menentukan pemenang</div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const form    = document.getElementById('compareForm');
+  const btn     = document.getElementById('submitBtn');
+  const overlay = document.getElementById('loadingOverlay');
+  const steps   = [
+    document.getElementById('step1'),
+    document.getElementById('step2'),
+    document.getElementById('step3'),
+    document.getElementById('step4'),
+  ];
+
+  form.addEventListener('submit', () => {
+    btn.textContent = 'Membandingkan...';
+    btn.disabled    = true;
+
+    overlay.style.display = 'flex';
+
+    let i = 0;
+    steps[0].classList.add('active');
+
+    const interval = setInterval(() => {
+      if (i < steps.length - 1) {
+        steps[i].classList.remove('active');
+        steps[i].textContent = '✅ ' + steps[i].textContent.slice(3);
+        steps[i].classList.add('done');
+        i++;
+        steps[i].classList.add('active');
+      } else {
+        clearInterval(interval);
+      }
+    }, 1200);
+  });
+</script>
+{% endblock %}

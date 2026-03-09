@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+
+{% block title %}Hasil — {{ result.keyword }}{% endblock %}
+
+{% block content %}
+<div class="result-container">
+
+  <div class="result-header">
+    <h1>Analisis: <span class="keyword-highlight">{{ result.keyword }}</span></h1>
+  </div>
+
+  <!-- Score + Breakdown -->
+  <div class="score-section">
+    <div class="score-card">
+      <div class="score-number" id="scoreDisplay">0</div>
+      <div class="score-label">{{ result.score_label }}</div>
+      <div class="score-subtitle">Trend Score / 100</div>
+    </div>
+
+    <div class="breakdown-card">
+      <h3>Detail Skor</h3>
+
+      <div class="breakdown-item">
+        <span class="breakdown-label">Rata-rata Interest</span>
+        <div class="breakdown-bar-wrap">
+          <div class="breakdown-bar">
+            <div class="breakdown-bar-fill" data-width="{{ result.breakdown.average_interest }}"></div>
+          </div>
+          <span class="breakdown-value">{{ result.breakdown.average_interest }}</span>
+        </div>
+      </div>
+
+      <div class="breakdown-item">
+        <span class="breakdown-label">Momentum Pasar</span>
+        <div class="breakdown-bar-wrap">
+          <div class="breakdown-bar">
+            <div class="breakdown-bar-fill" data-width="{{ result.breakdown.momentum_score }}"></div>
+          </div>
+          <span class="breakdown-value">{{ result.breakdown.momentum_score }}</span>
+        </div>
+      </div>
+
+      <div class="breakdown-item">
+        <span class="breakdown-label">Konsistensi</span>
+        <div class="breakdown-bar-wrap">
+          <div class="breakdown-bar">
+            <div class="breakdown-bar-fill" data-width="{{ result.breakdown.consistency_score }}"></div>
+          </div>
+          <span class="breakdown-value">{{ result.breakdown.consistency_score }}</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Chart -->
+  <div class="chart-section">
+    <h2>📉 Grafik Tren — 3 Bulan Terakhir</h2>
+    <div class="chart-container">
+      <canvas id="trendChart"></canvas>
+    </div>
+  </div>
+
+  <!-- AI Insight -->
+  <div class="insight-section">
+    <h2>💡 AI Business Insight</h2>
+    <div class="insight-box">
+      {{ result.ai_insight }}
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="action-buttons">
+    <a href="{% url 'analyzer:homepage' %}" class="btn btn-primary">
+      🔍 Analisis Keyword Lain
+    </a>
+    <a href="{% url 'analyzer:dashboard' %}" class="btn btn-secondary">
+      📊 Lihat Dashboard
+    </a>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.addEventListener('load', () => {
+
+    // Score counter
+    const target = parseFloat("{{ result.trend_score }}");
+    const el     = document.getElementById('scoreDisplay');
+    if (el) {
+      let current = 0;
+      const step  = target / 60;
+      const counter = setInterval(() => {
+        current += step;
+        if (current >= target) { current = target; clearInterval(counter); }
+        el.textContent = current.toFixed(1);
+      }, 16);
+    }
+
+    // Animate progress bars
+    document.querySelectorAll('.breakdown-bar-fill').forEach(bar => {
+    const w = parseFloat(bar.getAttribute('data-width').replace(',', '.'));
+    bar.style.width = '0%';
+    setTimeout(() => { bar.style.width = w + '%'; }, 100);
+    });
+
+    // Trend Chart
+    const labels = [{% for p in result.data_points %}"{{ p.date }}"{% if not forloop.last %},{% endif %}{% endfor %}];
+    const values = [{% for p in result.data_points %}{{ p.value }}{% if not forloop.last %},{% endif %}{% endfor %}];
+
+    const ctx = document.getElementById('trendChart').getContext('2d');
+
+    const gradient = ctx.createLinearGradient(0, 0, 0, 220);
+    gradient.addColorStop(0, 'rgba(255, 107, 53, 0.35)');
+    gradient.addColorStop(1, 'rgba(255, 107, 53, 0.0)');
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: '{{ result.keyword }}',
+          data: values,
+          borderColor: '#ff6b35',
+          borderWidth: 2.5,
+          backgroundColor: gradient,
+          fill: true,
+          tension: 0.4,
+          pointRadius: 3,
+          pointBackgroundColor: '#ff6b35',
+          pointBorderColor: '#080b14',
+          pointBorderWidth: 2,
+          pointHoverRadius: 6,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 1200, easing: 'easeInOutQuart' },
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(13,17,23,0.95)',
+            borderColor: 'rgba(255,107,53,0.3)',
+            borderWidth: 1,
+            titleColor: '#f0f0f0',
+            bodyColor: '#ff6b35',
+            padding: 12,
+            cornerRadius: 10,
+            callbacks: {
+              label: ctx => ` Interest: ${ctx.parsed.y}`
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(255,255,255,0.04)' },
+            ticks: { color: '#4a5568', font: { size: 10 }, maxTicksLimit: 8 }
+          },
+          y: {
+            min: 0, max: 100,
+            grid: { color: 'rgba(255,255,255,0.04)' },
+            ticks: { color: '#4a5568', font: { size: 10 } }
+          }
+        }
+      }
+    });
+
+  }); // end window.addEventListener
+</script>
+{% endblock %}

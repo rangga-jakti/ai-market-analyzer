@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% block title %}{{ result.keyword_a }} vs {{ result.keyword_b }}{% endblock %}
+
+{% block content %}
+<div class="result-container">
+
+  <div class="result-header">
+    <h1>
+      <span class="keyword-highlight">{{ result.keyword_a }}</span>
+      <span style="color: var(--text-muted); margin: 0 0.5rem;">vs</span>
+      <span style="color: #a78bfa;">{{ result.keyword_b }}</span>
+    </h1>
+    <p class="date-info">Perbandingan tren 3 bulan terakhir</p>
+  </div>
+
+  <!-- Winner Banner -->
+  <div class="winner-banner">
+    <div class="winner-content">
+      <span class="winner-trophy">🏆</span>
+      <div>
+        <div class="winner-label">Pemenang</div>
+        <div class="winner-name">{{ result.winner }}</div>
+      </div>
+      <div class="winner-margin">
+        unggul <strong>{{ result.margin }}</strong> poin rata-rata
+      </div>
+    </div>
+    <div class="momentum-info">
+      📈 Momentum terkini: <strong>{{ result.momentum_winner }}</strong>
+    </div>
+  </div>
+
+  <!-- Score Cards -->
+  <div class="compare-scores">
+    <div class="compare-score-card card-a {% if result.winner == result.keyword_a %}card-winner{% endif %}">
+      {% if result.winner == result.keyword_a %}
+      <div class="winner-tag">WINNER</div>
+      {% endif %}
+      <div class="compare-keyword">{{ result.keyword_a }}</div>
+      <div class="compare-avg">{{ result.avg_a }}</div>
+      <div class="compare-avg-label">rata-rata interest</div>
+    </div>
+
+    <div class="compare-vs-divider">VS</div>
+
+    <div class="compare-score-card card-b {% if result.winner == result.keyword_b %}card-winner{% endif %}">
+      {% if result.winner == result.keyword_b %}
+      <div class="winner-tag">WINNER</div>
+      {% endif %}
+      <div class="compare-keyword">{{ result.keyword_b }}</div>
+      <div class="compare-avg">{{ result.avg_b }}</div>
+      <div class="compare-avg-label">rata-rata interest</div>
+    </div>
+  </div>
+
+  <!-- Comparison Chart -->
+  <div class="chart-section">
+    <h2>📉 Grafik Perbandingan — 3 Bulan Terakhir</h2>
+    <div class="chart-container" style="height: 280px;">
+      <canvas id="compareChart"></canvas>
+    </div>
+    <!-- Legend -->
+    <div class="chart-legend">
+      <span class="legend-dot" style="background:#ff6b35"></span>
+      {{ result.keyword_a }}
+      <span class="legend-dot" style="background:#a78bfa; margin-left:1.5rem"></span>
+      {{ result.keyword_b }}
+    </div>
+  </div>
+
+  <div class="action-buttons">
+    <a href="{% url 'analyzer:compare' %}" class="btn btn-primary">
+      ⚔️ Bandingkan Lagi
+    </a>
+    <a href="{% url 'analyzer:homepage' %}" class="btn btn-secondary">
+      🔍 Analisis Tunggal
+    </a>
+    <a href="{% url 'analyzer:dashboard' %}" class="btn btn-secondary">
+      📊 Dashboard
+    </a>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const labels = {{ result.labels|safe }};
+  const dataA  = {{ result.data_a|safe }};
+  const dataB  = {{ result.data_b|safe }};
+  const kwA    = "{{ result.keyword_a }}";
+  const kwB    = "{{ result.keyword_b }}";
+
+  const ctx = document.getElementById('compareChart').getContext('2d');
+
+  const gradA = ctx.createLinearGradient(0, 0, 0, 280);
+  gradA.addColorStop(0, 'rgba(255,107,53,0.3)');
+  gradA.addColorStop(1, 'rgba(255,107,53,0.0)');
+
+  const gradB = ctx.createLinearGradient(0, 0, 0, 280);
+  gradB.addColorStop(0, 'rgba(167,139,250,0.3)');
+  gradB.addColorStop(1, 'rgba(167,139,250,0.0)');
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: kwA,
+          data: dataA,
+          borderColor: '#ff6b35',
+          backgroundColor: gradA,
+          borderWidth: 2.5,
+          fill: true,
+          tension: 0.4,
+          pointRadius: 2,
+          pointBackgroundColor: '#ff6b35',
+        },
+        {
+          label: kwB,
+          data: dataB,
+          borderColor: '#a78bfa',
+          backgroundColor: gradB,
+          borderWidth: 2.5,
+          fill: true,
+          tension: 0.4,
+          pointRadius: 2,
+          pointBackgroundColor: '#a78bfa',
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 1200, easing: 'easeInOutQuart' },
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(13,17,23,0.95)',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1,
+          titleColor: '#f0f0f0',
+          padding: 12,
+          cornerRadius: 10,
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: '#4a5568', font: { size: 10 }, maxTicksLimit: 8 }
+        },
+        y: {
+          min: 0, max: 100,
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: '#4a5568', font: { size: 10 } }
+        }
+      }
+    }
+  });
+</script>
+{% endblock %}
