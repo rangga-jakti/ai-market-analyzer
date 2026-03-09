@@ -1,6 +1,10 @@
 # AI Market Trend Analyzer
 
-> An AI-powered market trend analysis platform built with Django, Google Trends, and Groq LLM — helping businesses discover opportunities through real data.
+> Building an AI Market Trend Analyzer from Scratch
+
+Over the past few days, I built and deployed a full-stack AI-powered market analysis platform that helps users discover business opportunities using real Google Trends data.
+
+The application is now live in production and accessible online.
 
 ![Python](https://img.shields.io/badge/Python-3.12-blue?style=flat-square&logo=python)
 ![Django](https://img.shields.io/badge/Django-6.0-green?style=flat-square&logo=django)
